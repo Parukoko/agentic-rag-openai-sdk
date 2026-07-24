@@ -33,7 +33,10 @@ data/knowledge_base.txt
 .
 ├── pyproject.toml              # package metadata + dependencies
 ├── requirements.txt            # convenience alias for `pip install -e .[dev]`
+├── Dockerfile                  # container image for the CLI
+├── .dockerignore
 ├── .env.example                # template for gateway credentials
+├── .github/workflows/ci.yml    # CI: runs tests + builds the Docker image
 ├── data/
 │   └── knowledge_base.txt      # sample knowledge base (fictional company policies)
 ├── src/agentic_rag/
@@ -84,6 +87,24 @@ pytest
 ```
 
 Covers the keyword-overlap ranking logic in `retriever.py` directly, with no network/API calls involved.
+
+## Docker
+
+```bash
+docker build -t agentic-rag .
+docker run --rm --env-file .env agentic-rag
+```
+
+The image installs the package and runs the same `agentic-rag` entrypoint as the local CLI; credentials are passed at `docker run` time via `--env-file`, never baked into the image.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push/PR to `main`:
+
+- **test**: installs the package (`pip install -e ".[dev]"`) and runs `pytest` on Python 3.10 and 3.13.
+- **docker-build**: builds the Dockerfile to catch packaging/container regressions.
+
+Neither job needs the LLM API key — they validate the code and retrieval logic, not live model calls.
 
 ## Example query
 
