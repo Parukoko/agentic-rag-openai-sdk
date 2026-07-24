@@ -31,8 +31,8 @@ data_retriever_agent = Agent(
 retrieve_information_tool = data_retriever_agent.as_tool(
     tool_name="retrieve_information",
     tool_description=(
-        "Retrieve raw, relevant text snippets from the company knowledge "
-        "base for a given question or topic."
+        "Retrieve raw, relevant text snippets from the knowledge base for "
+        "a given question or topic."
     ),
 )
 

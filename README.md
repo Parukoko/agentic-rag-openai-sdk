@@ -24,7 +24,7 @@ data/knowledge_base.txt
 
 - **Data Retriever** is instructed to only call `search_knowledge_base` and return the raw snippets it finds — no summarizing, no answering.
 - **Data Retriever** is exposed to the **Report Generator** as a callable tool via `agent.as_tool(...)`, so the Report Generator automatically invokes it, receives the raw snippets, and synthesizes them into one non-redundant, well-formatted answer. It's instructed to stick strictly to retrieved content and never fall back to outside knowledge.
-- `search_knowledge_base` is a thin wrapper around `search()` (`retriever.py`), a plain, dependency-free function that ranks paragraph-level chunks of the knowledge base by keyword overlap with the query, ignoring terms so common across chunks (e.g. a company name repeated in every paragraph) that they carry no relevance signal.
+- `search_knowledge_base` is a thin wrapper around `search()` (`retriever.py`), a plain, dependency-free function that ranks paragraph-level chunks of the knowledge base by keyword overlap with the query, ignoring terms so common across chunks (e.g. the main subject's name repeated in every paragraph) that they carry no relevance signal.
 - The LLM (`gpt-5-mini`) is served behind an Azure API Management gateway exposing an OpenAI-compatible **Responses API** at `POST {LLM_API_BASE_URL}/responses`, authenticated with an `api-key` header. `config.py` points the Agents SDK's default OpenAI client at this gateway.
 
 ## Project layout
@@ -38,7 +38,7 @@ data/knowledge_base.txt
 ├── .env.example                # template for gateway credentials
 ├── .github/workflows/ci.yml    # CI: runs tests + builds the Docker image
 ├── data/
-│   └── knowledge_base.txt      # sample knowledge base (fictional company policies)
+│   └── knowledge_base.txt      # sample knowledge base (real facts about cats)
 ├── src/agentic_rag/
 │   ├── config.py                # env vars + LLM client wiring
 │   ├── retriever.py              # RAG tool: search() + search_knowledge_base

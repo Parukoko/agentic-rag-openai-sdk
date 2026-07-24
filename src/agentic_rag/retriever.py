@@ -53,10 +53,10 @@ def document_frequencies(chunks: list[str]) -> dict[str, int]:
 def search(query: str, chunks: list[str], max_results: int = 3) -> str:
     """Rank chunks by keyword overlap with the query and return the top matches.
 
-    Query words appearing in more than half the chunks (e.g. a company name
-    repeated in every paragraph) are ignored as too common to be a useful
-    relevance signal. Falls back to the raw query words if that filtering
-    removes everything.
+    Query words appearing in more than half the chunks (e.g. the main
+    subject's name repeated in every paragraph) are ignored as too common
+    to be a useful relevance signal. Falls back to the raw query words if
+    that filtering removes everything.
     """
     query_words = tokenize(query)
     if not query_words:
