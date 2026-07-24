@@ -19,30 +19,39 @@ Data Retriever (Agent)    -- expert at retrieval only, never answers directly
 search_knowledge_base()   -- custom Python function: keyword-overlap search
    |
    v
-knowledge_base.txt
+data/knowledge_base.txt
 ```
 
 - **Data Retriever** is instructed to only call `search_knowledge_base` and return the raw snippets it finds — no summarizing, no answering.
-- **Data Retriever** is exposed to the **Report Generator** as a callable tool via `agent.as_tool(...)`, so the Report Generator automatically invokes it, receives the raw snippets, and synthesizes them into one non-redundant, well-formatted answer.
-- `search_knowledge_base` is a plain Python function (`retriever_tool.py`) that reads `knowledge_base.txt`, splits it into paragraph-level chunks, and ranks chunks by keyword overlap with the query — a simple, dependency-free RAG mechanism.
-- The LLM (`gpt-5-mini`) is served behind an Azure API Management gateway exposing an OpenAI-compatible **Responses API** at `POST {LLM_API_BASE_URL}/responses`, authenticated with an `api-key` header. `agents_app.py` points the Agents SDK's default OpenAI client at this gateway via `set_default_openai_client(...)`.
+- **Data Retriever** is exposed to the **Report Generator** as a callable tool via `agent.as_tool(...)`, so the Report Generator automatically invokes it, receives the raw snippets, and synthesizes them into one non-redundant, well-formatted answer. It's instructed to stick strictly to retrieved content and never fall back to outside knowledge.
+- `search_knowledge_base` is a thin wrapper around `search()` (`retriever.py`), a plain, dependency-free function that ranks paragraph-level chunks of the knowledge base by keyword overlap with the query, ignoring terms so common across chunks (e.g. a company name repeated in every paragraph) that they carry no relevance signal.
+- The LLM (`gpt-5-mini`) is served behind an Azure API Management gateway exposing an OpenAI-compatible **Responses API** at `POST {LLM_API_BASE_URL}/responses`, authenticated with an `api-key` header. `config.py` points the Agents SDK's default OpenAI client at this gateway.
 
-## Files
+## Project layout
 
-| File | Purpose |
-|---|---|
-| `knowledge_base.txt` | Sample knowledge base (fictional company policies + product info). |
-| `retriever_tool.py` | Custom RAG tool: keyword-overlap search over `knowledge_base.txt`. |
-| `agents_app.py` | Agent definitions, Azure OpenAI wiring, orchestration, sample run. |
-| `.env.example` | Template for the Azure OpenAI credentials. |
-| `requirements.txt` | Python dependencies. |
+```
+.
+├── pyproject.toml              # package metadata + dependencies
+├── requirements.txt            # convenience alias for `pip install -e .[dev]`
+├── .env.example                # template for gateway credentials
+├── data/
+│   └── knowledge_base.txt      # sample knowledge base (fictional company policies)
+├── src/agentic_rag/
+│   ├── config.py                # env vars + LLM client wiring
+│   ├── retriever.py              # RAG tool: search() + search_knowledge_base
+│   ├── agents.py                  # Data Retriever + Report Generator agent definitions
+│   └── main.py                    # CLI entrypoint / sample run
+├── tests/
+│   └── test_retriever.py       # unit tests for the retrieval/scoring logic
+└── screenshots/                # sample run screenshots for submission
+```
 
 ## Setup
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt   # editable install of this package + pytest
 
 cp .env.example .env
 # then edit .env with your real API key
@@ -55,15 +64,24 @@ The included `.env.example` is pre-filled with the gateway base URL and model gi
 
 You only need to supply `LLM_API_KEY`.
 
-> To use a plain OpenAI key instead of this gateway, drop the `default_headers` override and `base_url` in `agents_app.py` and just do `AsyncOpenAI(api_key=...)`, then set `model="gpt-4o-mini"` (or any chat model) on both agents.
+> To use a plain OpenAI key instead of this gateway, drop the `default_headers` override and `base_url` in `config.py` and just do `AsyncOpenAI(api_key=...)`, then set `model="gpt-4o-mini"` (or any chat model) in `agents.py`.
 
 ## Run
 
 ```bash
-python agents_app.py
+agentic-rag
+# or: python -m agentic_rag.main
 ```
 
 This runs a few sample queries (including one with no answer in the knowledge base, to show the system doesn't hallucinate) and prints each query with its synthesized answer.
+
+## Test
+
+```bash
+pytest
+```
+
+Covers the keyword-overlap ranking logic in `retriever.py` directly, with no network/API calls involved.
 
 ## Example query
 
@@ -72,4 +90,4 @@ Q: What is the policy on international travel?
 A: <synthesized, well-formatted answer based only on the retrieved snippets>
 ```
 
-Screenshots of runs for multiple queries are included in this repo (see `/screenshots`).
+Screenshots of runs for multiple queries are included in this repo under `screenshots/`.
