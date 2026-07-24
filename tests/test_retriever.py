@@ -1,23 +1,23 @@
 from agentic_rag.retriever import search, tokenize
 
 SAMPLE_CHUNKS = [
-    "Acme Corp International Travel Policy: international travel requires "
-    "approval and a valid passport.",
-    "Acme Corp Domestic Travel Policy: domestic travel within the country is "
-    "simpler and needs less notice.",
-    "Acme Corp PTO Policy: employees accrue fifteen days of paid time off "
-    "per year.",
+    "Cat Domestication: Cats were domesticated from African wildcats roughly "
+    "10,000 years ago in the Near East.",
+    "Cat Behavior: Cats communicate through meowing, purring, and body "
+    "language such as tail position.",
+    "Cat Nutrition: Cats are obligate carnivores and require taurine from "
+    "animal-based food.",
 ]
 
 
 def test_search_ranks_most_relevant_chunk_first():
-    result = search("What is the international travel policy?", SAMPLE_CHUNKS)
-    assert result.startswith("Acme Corp International Travel Policy")
+    result = search("How were cats domesticated?", SAMPLE_CHUNKS)
+    assert result.startswith("Cat Domestication")
 
 
 def test_search_ignores_terms_common_to_most_chunks():
-    # "Acme" appears in every chunk, so it should not, by itself, count as a match.
-    result = search("What is Acme's drone delivery policy?", SAMPLE_CHUNKS)
+    # "Cats" appears in every chunk, so it should not, by itself, count as a match.
+    result = search("What is the cats' policy on drone deliveries?", SAMPLE_CHUNKS)
     assert result == "No relevant information found in the knowledge base."
 
 
@@ -27,4 +27,4 @@ def test_search_returns_message_when_query_has_no_keywords():
 
 
 def test_tokenize_strips_punctuation_and_stopwords():
-    assert tokenize("What is the PTO policy?") == {"pto"}
+    assert tokenize("What is the diet policy?") == {"diet"}
