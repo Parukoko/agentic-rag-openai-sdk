@@ -8,10 +8,10 @@ from agents import Runner
 from .agents import report_generator_agent
 
 SAMPLE_QUERIES = [
-    "What is the policy on international travel?",
-    "How much PTO do employees get and does it carry over?",
-    "What are the SLA and support response times for enterprise customers?",
-    "What's Acme's policy on drone deliveries?",  # expected: not in KB
+    "How were cats domesticated?",
+    "Why do cats need meat in their diet?",
+    "How long do indoor cats typically live?",
+    "What is the policy on international travel?",  # expected: not in KB
 ]
 
 

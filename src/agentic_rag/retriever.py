@@ -15,8 +15,17 @@ DEFAULT_KB_PATH = Path(__file__).resolve().parents[2] / "data" / "knowledge_base
 KB_PATH = Path(os.environ.get("KNOWLEDGE_BASE_PATH", DEFAULT_KB_PATH))
 
 STOPWORDS = {
-    "the", "a", "an", "is", "are", "of", "on", "in", "to", "for", "and",
-    "what", "what's", "how", "does", "do", "policy", "about", "with", "our",
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+    "of", "on", "in", "to", "for", "and", "or", "but", "not", "no", "so",
+    "at", "by", "from", "into", "over", "under", "up", "down", "out",
+    "what", "what's", "which", "who", "whom", "how", "why", "when", "where",
+    "does", "do", "did", "doing", "have", "has", "had", "having",
+    "can", "could", "may", "might", "must", "shall", "should", "will", "would",
+    "i", "you", "he", "she", "it", "we", "they", "them", "their", "theirs",
+    "this", "that", "these", "those", "there", "here",
+    "policy", "about", "with", "our", "your", "its",
+    "also", "more", "most", "other", "than", "then", "than",
+    "need", "needs", "want", "wants", "get", "gets",
 }
 
 

@@ -46,6 +46,8 @@ data/knowledge_base.txt
 └── screenshots/                # sample run screenshots for submission
 ```
 
+The knowledge base (`data/knowledge_base.txt`) contains real, verifiable facts about domestic cats (domestication history, anatomy, behavior, diet, lifespan, health, breeds) — not fabricated content.
+
 ## Setup
 
 ```bash
@@ -86,8 +88,11 @@ Covers the keyword-overlap ranking logic in `retriever.py` directly, with no net
 ## Example query
 
 ```
-Q: What is the policy on international travel?
+Q: How were cats domesticated?
 A: <synthesized, well-formatted answer based only on the retrieved snippets>
+
+Q: What is the policy on international travel?
+A: The knowledge base does not contain any information about that. (deliberately out of scope, to show the system doesn't hallucinate)
 ```
 
 Screenshots of runs for multiple queries are included in this repo under `screenshots/`.
