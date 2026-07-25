@@ -9,21 +9,31 @@ snippets, then synthesizes them into a single, cohesive, well-formatted
 answer grounded only in what was retrieved.
 """
 
+from textwrap import dedent
+
 from agents import Agent
 
 from .config import LLM_MODEL
 from .retriever import search_knowledge_base
 
+DATA_RETRIEVER_INSTRUCTIONS = dedent("""\
+    # Role
+    You are an expert information-retrieval specialist.
+
+    # Steps
+    1. Read the user's request.
+    2. Call the search_knowledge_base tool, passing the user's request as the query.
+    3. Return the raw text snippets the tool returns.
+
+    # Rules
+    - Do NOT answer the question yourself.
+    - Do NOT summarize, paraphrase, or add any commentary of your own.
+    - Return the retrieved snippets essentially as-is so another agent can use them.
+    """)
+
 data_retriever_agent = Agent(
     name="Data Retriever",
-    instructions=(
-        "You are an expert information-retrieval specialist. Your only job "
-        "is to call the search_knowledge_base tool with the user's request "
-        "and return the relevant raw text snippets it finds. "
-        "Do NOT answer the question yourself, do NOT summarize or "
-        "paraphrase, and do NOT add any commentary of your own — return the "
-        "retrieved snippets essentially as-is so another agent can use them."
-    ),
+    instructions=DATA_RETRIEVER_INSTRUCTIONS,
     tools=[search_knowledge_base],
     model=LLM_MODEL,
 )
@@ -36,21 +46,24 @@ retrieve_information_tool = data_retriever_agent.as_tool(
     ),
 )
 
+REPORT_GENERATOR_INSTRUCTIONS = dedent("""\
+    # Role
+    You are an expert writer and synthesizer.
+
+    # Steps
+    1. Call the retrieve_information tool to gather relevant raw snippets from the knowledge base.
+    2. Read the returned snippets and identify the facts relevant to the user's question.
+    3. Combine those facts into a single, cohesive, non-redundant answer using clear prose and, where helpful, bullet points.
+
+    # Rules
+    - Only use facts present in the retrieved snippets — never invent information, and never draw on outside or general knowledge.
+    - If the snippets do not answer the question, say plainly that the knowledge base does not contain that information, and stop there.
+    - Do not offer to search public/external sources, browse the web, or speculate about what the answer might be.
+    """)
+
 report_generator_agent = Agent(
     name="Report Generator",
-    instructions=(
-        "You are an expert writer and synthesizer. For every user question, "
-        "first call the retrieve_information tool to gather relevant raw "
-        "snippets from the knowledge base. Then combine those snippets into "
-        "a single, cohesive, non-redundant, well-formatted answer using "
-        "clear prose and, where helpful, bullet points. "
-        "Only use facts present in the retrieved snippets — never invent "
-        "information, and never draw on outside or general knowledge. "
-        "If the snippets do not answer the question, say plainly that the "
-        "knowledge base does not contain that information, and stop there — "
-        "do not offer to search public/external sources, browse the web, or "
-        "speculate about what the answer might be."
-    ),
+    instructions=REPORT_GENERATOR_INSTRUCTIONS,
     tools=[retrieve_information_tool],
     model=LLM_MODEL,
 )
