@@ -1,7 +1,10 @@
 """Agent definitions, wired together with the agent-as-tool pattern.
 
 Data Retriever: calls the search_knowledge_base tool and returns raw,
-relevant snippets. It is instructed NOT to answer the question itself.
+relevant snippets. It is instructed NOT to answer the question itself, and
+uses tool_use_behavior="stop_on_first_tool" so the tool's raw output is
+returned directly as the agent's final output — skipping the extra LLM
+round-trip it would otherwise take to restate that output.
 
 Report Generator: exposes the Data Retriever as a callable tool
 (`retrieve_information`) and, when asked a question, calls it to gather
@@ -36,6 +39,10 @@ data_retriever_agent = Agent(
     instructions=DATA_RETRIEVER_INSTRUCTIONS,
     tools=[search_knowledge_base],
     model=LLM_MODEL,
+    # The tool's output already *is* the desired final output (raw
+    # snippets), so skip the extra LLM call that would otherwise just
+    # restate it — cuts one full round-trip out of the pipeline per query.
+    tool_use_behavior="stop_on_first_tool",
 )
 
 retrieve_information_tool = data_retriever_agent.as_tool(
